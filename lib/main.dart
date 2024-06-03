@@ -1,8 +1,10 @@
 // import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+// import 'package:flutter/rendering.dart';
 // import 'package:flutter/widgets.dart';
 import 'package:flutter_ui_exame/core/config.dart';
+import 'package:flutter_ui_exame/model/pepolemodel.dart';
 import 'package:flutter_ui_exame/service/get_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,12 +18,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: inventsFrinds(),
+      // home: inventsFrinds(),
+      home: core.get<SharedPreferences>().getString('USERNAME') == null &&
+              core.get<SharedPreferences>().getString('PASSWORD') == null
+          ? LogInPage()
+          : inventsFrinds(),
     );
   }
 }
-
-TextEditingController username = TextEditingController();
 
 class LogInPage extends StatelessWidget {
   LogInPage({super.key});
@@ -56,7 +60,7 @@ class LogInPage extends StatelessWidget {
                     child: Column(
                       children: [
                         const Text(
-                          // textAlign: TextAlign.start,
+                          textAlign: TextAlign.start,
                           "USERNAME",
                           style: TextStyle(
                             color: Colors.white,
@@ -74,7 +78,7 @@ class LogInPage extends StatelessWidget {
                               },
                               decoration: InputDecoration(
                                 hintText: "Enter Email or username",
-                                hintStyle: TextStyle(color: Colors.white10),
+                                hintStyle: TextStyle(color: Colors.white70),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
@@ -99,7 +103,7 @@ class LogInPage extends StatelessWidget {
                               },
                               decoration: InputDecoration(
                                 hintText: "Enter your password",
-                                hintStyle: TextStyle(color: Colors.white10),
+                                hintStyle: TextStyle(color: Colors.white70),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
@@ -125,28 +129,11 @@ class LogInPage extends StatelessWidget {
                             children: [
                               InkWell(
                                 onTap: () {
-                                  if (core
-                                              .get<SharedPreferences>()
-                                              .getString('USERNAME') ==
-                                          null &&
-                                      core
-                                              .get<SharedPreferences>()
-                                              .getString('PASSWORD') ==
-                                          null) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(const SnackBar(
-                                      content: Text(
-                                          "Enter your name and your password"),
-                                      backgroundColor: Colors.red,
-                                      behavior: SnackBarBehavior.floating,
-                                    ));
-                                  } else {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => inventsFrinds(),
-                                        ));
-                                  }
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => inventsFrinds(),
+                                      ));
                                 },
                                 child: Container(
                                   width: 400,
@@ -193,8 +180,15 @@ class LogInPage extends StatelessWidget {
   }
 }
 
-class inventsFrinds extends StatelessWidget {
-  const inventsFrinds({super.key});
+class inventsFrinds extends StatefulWidget {
+  inventsFrinds({super.key});
+
+  @override
+  State<inventsFrinds> createState() => _inventsFrindsState();
+}
+
+class _inventsFrindsState extends State<inventsFrinds> {
+  List<pepole> result = [];
 
   @override
   Widget build(BuildContext context) {
@@ -207,7 +201,7 @@ class inventsFrinds extends StatelessWidget {
                 color: Colors.black,
                 image: DecorationImage(
                     image: Image.asset("Mapsicle Map.png").image)),
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 CircleAvatar(
@@ -224,57 +218,165 @@ class inventsFrinds extends StatelessWidget {
             ),
           ),
           Expanded(
-              child: FutureBuilder(
-                  future: getpepoleData(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Center(
-                        child: Container(
-                          // color: Colors.black,
-                          width: 700,
-                          height: 700,
-                          // color: const Color.fromARGB(200, 199, 117, 145),
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                  height: 400,
-                                  // width: 200,
-                                  child: ListView.builder(
-                                      itemCount: snapshot.data!.length,
-                                      itemBuilder: (context, index) {
-                                        return ListTile(
-                                          leading: CircleAvatar(
-                                            child: Image(
-                                                image: Image.network(snapshot
-                                                        .data![index].image)
-                                                    .image),
-                                          ),
-                                          title: Text(
-                                            snapshot.data![index].name,
-                                          ),
-                                          subtitle: Text(
-                                            snapshot.data![index].message,
-                                          ),
-                                          trailing:
-                                              Text(snapshot.data![index].date),
-                                        );
-                                      }))
-                            ],
-                          ),
+            child: FutureBuilder(
+              future: getpepoleData(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  List<pepole> pepo = snapshot.data as List<pepole>;
+                  result = pepo;
+                  return StatefulBuilder(builder: (context, refresh) {
+                    return Column(
+                      children: [
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: SizedBox(
+                                width: 300,
+                                child: TextField(
+                                  onChanged: (value) {
+                                    result = [];
+                                    refresh(() {
+                                      pepo.forEach(
+                                        (element) {
+                                          if (element.name.contains(value)) {
+                                            result.add(element);
+                                          }
+                                        },
+                                      );
+                                      core
+                                          .get<SharedPreferences>()
+                                          .setString('result', value);
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Icon(Icons.search)
+                          ],
                         ),
-                      );
-                    } else {
-                      return const CircularProgressIndicator();
-                    }
-                  }))
+                        SizedBox(
+                          height: 400,
+                          child: ListView.builder(
+                            itemCount: result.length,
+                            itemBuilder: (context, index) {
+                              return InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => inventsFrinds1(
+                                              pepole: result[index]),
+                                        ));
+                                  },
+                                  child: ListTile(
+                                    leading: CircleAvatar(
+                                      child: Image(
+                                          image:
+                                              Image.network(result[index].image)
+                                                  .image),
+                                    ),
+                                    title: Text(
+                                      result[index].name,
+                                    ),
+                                    subtitle: Text(
+                                      result[index].message,
+                                    ),
+                                    trailing: Text(result[index].date),
+                                  ));
+                            },
+                          ),
+                        )
+                      ],
+                    );
+                  });
+                } else {
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              width: 300,
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Icon(Icons.search)
+                        ],
+                      ),
+                      LinearProgressIndicator()
+                    ],
+                  );
+                }
+              },
+            ),
+          )
+
+          // Expanded(
+          //     child: FutureBuilder(
+          //         future: getpepoleData(),
+          //         builder: (context, snapshot) {
+          //           if (snapshot.hasData) {
+          //             return Center(
+          //               child: Container(
+          //                 // color: Colors.black,
+          //                 width: 700,
+          //                 height: 700,
+          //                 // color: const Color.fromARGB(200, 199, 117, 145),
+          //                 child: Column(
+          //                   children: [
+          //                     SizedBox(
+          //                         height: 400,
+          //                         // width: 200,
+          //                         child: ListView.builder(
+          //                             itemCount: snapshot.data!.length,
+          //                             itemBuilder: (context, index) {
+          //                               return ListTile(
+          //                                 leading: CircleAvatar(
+          //                                   child: Image(
+          //                                       image: Image.network(snapshot
+          //                                               .data![index].image)
+          //                                           .image),
+          //                                 ),
+          //                                 title: Text(
+          //                                   snapshot.data![index].name,
+          //                                 ),
+          //                                 subtitle: Text(
+          //                                   snapshot.data![index].message,
+          //                                 ),
+          //                                 trailing:
+          //                                     Text(snapshot.data![index].date),
+          //                               );
+          //                             }))
+          //                   ],
+          //                 ),
+          //               ),
+          //             );
+          //           } else {
+          //             return const CircularProgressIndicator();
+          //           }
+          //         }))
         ],
       ),
     );
   }
 }
 
+// ignore: camel_case_types
 class inventsFrinds1 extends StatelessWidget {
-  const inventsFrinds1({super.key});
+  const inventsFrinds1({super.key, required pepole pepole});
 
   @override
   Widget build(BuildContext context) {
@@ -282,12 +384,12 @@ class inventsFrinds1 extends StatelessWidget {
       body: Column(
         children: [
           Container(
-            height: 200,
+            height: 150,
             decoration: BoxDecoration(
                 color: Colors.black,
                 image: DecorationImage(
                     image: Image.asset("Mapsicle Map.png").image)),
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 CircleAvatar(
@@ -304,47 +406,66 @@ class inventsFrinds1 extends StatelessWidget {
             ),
           ),
           Expanded(
-              child: Center(
-            child: Column(
-              children: [
-                Image.asset(
-                  "Artwork.jpg",
-                  width: 300,
-                  height: 300,
-                ),
-                Text("data"),
-                Text("data"),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SizedBox(
-                    width: 400,
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: "Enter your password",
-                        hintStyle: TextStyle(color: Colors.white),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
+              flex: 2,
+              child: Container(
+                width: double.infinity,
+                color: Colors.black,
+                child: Center(
+                  child: Column(
+                    children: [
+                      Center(
+                        child: Image.asset(
+                          "images/Artwork.jpg",
+                          height: 200,
                         ),
                       ),
-                    ),
+                      const Text("invinte Friends",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold)),
+                      Center(
+                        child: const Text(
+                            "Sing up a friend with your referral \n code and earn \$RIIDE and /or free rides.",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                            )),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SizedBox(
+                          width: 400,
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: "Share your invite code",
+                              hintStyle: const TextStyle(
+                                  color: Colors.white70, fontSize: 15),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 400,
+                        height: 50,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.green),
+                        child: const Padding(
+                          padding: EdgeInsets.all(15.0),
+                          child: Text("invinte Friends",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Container(
-                  width: 400,
-                  height: 50,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: Colors.green),
-                  child: const Padding(
-                    padding: EdgeInsets.all(15.0),
-                    child: Text("invents Frinds1",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white)),
-                  ),
-                ),
-              ],
-            ),
-          ))
+              ))
         ],
       ),
     );
