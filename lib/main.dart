@@ -303,7 +303,48 @@ class inventsFrinds1 extends StatelessWidget {
               ],
             ),
           ),
-          Expanded(child: Column())
+          Expanded(
+              child: Center(
+            child: Column(
+              children: [
+                Image.asset(
+                  "Artwork.jpg",
+                  width: 300,
+                  height: 300,
+                ),
+                Text("data"),
+                Text("data"),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    width: 400,
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: "Enter your password",
+                        hintStyle: TextStyle(color: Colors.white),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 400,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.green),
+                  child: const Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Text("invents Frinds1",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ],
+            ),
+          ))
         ],
       ),
     );
