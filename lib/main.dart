@@ -272,3 +272,40 @@ class inventsFrinds extends StatelessWidget {
     );
   }
 }
+
+class inventsFrinds1 extends StatelessWidget {
+  const inventsFrinds1({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+                color: Colors.black,
+                image: DecorationImage(
+                    image: Image.asset("Mapsicle Map.png").image)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                CircleAvatar(
+                  child: Icon(Icons.arrow_back_rounded),
+                ),
+                Text(
+                  "invite friends",
+                  style: TextStyle(color: Colors.white),
+                ),
+                CircleAvatar(
+                  child: Icon(Icons.delete),
+                ),
+              ],
+            ),
+          ),
+          Expanded(child: Column())
+        ],
+      ),
+    );
+  }
+}
