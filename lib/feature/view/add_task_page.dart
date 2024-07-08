@@ -73,14 +73,7 @@ class add_task_page extends StatelessWidget {
                                         padding: const EdgeInsets.only(
                                             top: 15, left: 10, right: 10),
                                         child: TextField(
-                                          decoration:
-                                              // (state.addtaskTotextfield
-                                              //                 .length -
-                                              //             1 ==
-                                              //         index)
-                                              //     ? null
-                                              //     :
-                                              InputDecoration(
+                                          decoration: InputDecoration(
                                             hintText: temp,
                                             filled: true,
                                             fillColor: Colors.white,
